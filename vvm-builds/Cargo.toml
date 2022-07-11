@@ -1,0 +1,24 @@
+[package]
+name = "vvm-rs-builds"
+version = "0.0.1"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = """
+Vyper-Compiler (vyper) builds.
+"""
+readme = "../README.md"
+repository = "https://github.com/storming0x/vvm-rs"
+homepage = "https://github.com/storming0x/vvm-rs"
+build = "build.rs"
+
+[build-dependencies]
+build_const = "0.2.2"
+vvm = { package = "vvm-rs", version = "0.0.1", path = "..", features = ["blocking"]}
+semver = { version = "1.0.4", default-features = false, features = ["std", "serde"] }
+hex = "0.4.3"
+serde_json = "1.0.79"
+
+[dependencies]
+build_const = "0.2.2"
+hex = "0.4.3"
+semver = { version = "1.0.4", default-features = false, features = ["std", "serde"] }
