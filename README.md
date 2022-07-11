@@ -12,6 +12,10 @@ cd vvm-rs
 cargo install --path ./ --bins --locked --force
 ```
 
+### Manual Download
+
+You can manually download release for your platform [here](https://github.com/storming0x/vvm-rs/releases)
+
 ### Usage
 * List available versions
 ```
@@ -32,8 +36,8 @@ $ vvm remove <version>
 
 ### Credit and Acknowledgments
 
-[SVM-RS](https://github.com/roynalnaruto/svm-rs)
-[VVM](https://github.com/vyperlang/vvm)
+* [SVM-RS](https://github.com/roynalnaruto/svm-rs)
+* [VVM](https://github.com/vyperlang/vvm)
 
 ## Contributing
 
