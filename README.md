@@ -1,8 +1,5 @@
 # Vyper Compiler Version Manager in Rust
 
-
-### Requires
-
 ### Install
 ```
 $ cargo install --git https://github.com/storming0x/vvm-rs --locked vvm

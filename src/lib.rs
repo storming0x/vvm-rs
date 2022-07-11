@@ -1,13 +1,12 @@
 use once_cell::sync::Lazy;
-use semver::{Version, VersionReq};
-use sha2::Digest;
+use semver::Version;
+// use sha2::Digest;
 
 use std::{
     ffi::OsString,
     fs,
     io::{Cursor, Write},
     path::PathBuf,
-    process::Command,
 };
 
 use std::time::Duration;
@@ -44,9 +43,6 @@ pub static VVM_HOME: Lazy<PathBuf> = Lazy::new(|| {
 /// The timeout to use for requests to the source
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(120);
 
-/// Version beyond which Vyper binaries are not fully static, hence need to be patched for NixOS.
-static NIXOS_PATCH_REQ: Lazy<VersionReq> = Lazy::new(|| VersionReq::parse(">=0.8.0").unwrap());
-
 // Installer type that copies binary data to the appropriate Vyper binary file:
 // 1. create target file to copy binary data
 // 2. copy data
@@ -72,11 +68,7 @@ impl Installer {
         let mut content = Cursor::new(&self.binbytes);
         std::io::copy(&mut content, &mut f)?;
 
-        if platform::is_nixos() && NIXOS_PATCH_REQ.matches(&self.version) {
-            patch_for_nixos(vyper_path)
-        } else {
-            Ok(vyper_path)
-        }
+        Ok(vyper_path)
     }
 
     /// Extracts the vyper archive at the version specified destination and returns the path to the
@@ -95,28 +87,6 @@ impl Installer {
         std::fs::rename(version_path.join("vyper.exe"), vyper_path.as_path())?;
 
         Ok(vyper_path)
-    }
-}
-
-/// Patch the given binary to use the dynamic linker provided by nixos
-pub fn patch_for_nixos(bin: PathBuf) -> Result<PathBuf, VyperVmError> {
-    let output = Command::new("nix-shell")
-        .arg("-p")
-        .arg("patchelf")
-        .arg("--run")
-        .arg(format!(
-            "patchelf --set-interpreter \"$(cat $NIX_CC/nix-support/dynamic-linker)\" {}",
-            bin.display()
-        ))
-        .output()
-        .expect("Failed to execute command");
-
-    match output.status.success() {
-        true => Ok(bin),
-        false => Err(VyperVmError::CouldNotPatchForNixOs(
-            String::from_utf8(output.stdout).expect("Found invalid UTF-8 when parsing stdout"),
-            String::from_utf8(output.stderr).expect("Found invalid UTF-8 when parsing stderr"),
-        )),
     }
 }
 
@@ -158,22 +128,25 @@ pub fn unset_global_version() -> Result<(), VyperVmError> {
 /// sorted in ascending order.
 pub fn installed_versions() -> Result<Vec<Version>, VyperVmError> {
     let home_dir = VVM_HOME.to_path_buf();
+    println!("home_dir {:?}", &home_dir);
     let mut versions = vec![];
     for v in fs::read_dir(&home_dir)? {
         let v = v?;
         if v.file_name() != OsString::from(".global-version".to_string()) {
             versions.push(Version::parse(
-                v.path()
+                &v.path()
                     .file_name()
                     .ok_or(VyperVmError::UnknownVersion)?
                     .to_str()
                     .ok_or(VyperVmError::UnknownVersion)?
                     .to_string()
-                    .as_str(),
+                    .as_str()
+                    .replace("vyper-", ""),
             )?);
         }
     }
     versions.sort();
+
     Ok(versions)
 }
 
@@ -422,6 +395,21 @@ mod tests {
         assert!(install(rand_version).await.is_ok());
     }
 
+    #[tokio::test]
+    async fn test_installed_versions() {
+        let versions = all_releases(platform())
+            .await
+            .unwrap()
+            .releases
+            .into_keys()
+            .collect::<Vec<Version>>();
+        let rand_version = versions.choose(&mut rand::thread_rng()).unwrap();
+        assert!(install(rand_version).await.is_ok());
+        let installed_versions = installed_versions().unwrap_or_default();
+        assert!(&installed_versions.len() > &0);
+        assert!(&installed_versions.contains(rand_version));
+    }
+
     #[cfg(feature = "blocking")]
     #[test]
     fn blocking_test_install() {
@@ -505,7 +493,7 @@ mod tests {
 
         let resp = reqwest::get(download_url).await.unwrap();
         assert!(resp.status().is_success());
-        let binbytes = resp.bytes().await.unwrap();
+        let _binbytes = resp.bytes().await.unwrap();
         // TODO: implement checksum for vyper binaries
         // ensure_checksum(&binbytes, &latest, checksum).unwrap();
     }
