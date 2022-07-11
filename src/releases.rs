@@ -138,7 +138,7 @@ pub async fn all_releases(platform: Platform) -> Result<Releases, VyperVmError> 
         for asset in vyper_release.assets {
             if asset.name.contains(platform_str) {
                 let version =
-                    Version::parse(&vyper_release.tag_name.trim_start_matches("v")).unwrap();
+                    Version::parse(vyper_release.tag_name.trim_start_matches('v')).unwrap();
                 builds.push(BuildInfo {
                     version: version.clone(),
                     sha256: Vec::new(),
@@ -167,6 +167,7 @@ async fn get_releases() -> Result<Vec<VyperReleases>, VyperVmError> {
     Ok(vyper_releases)
 }
 
+#[allow(dead_code)]
 fn blocking_get_releases() -> Result<Vec<VyperReleases>, VyperVmError> {
     let mut headers = HeaderMap::new();
     // add the user-agent header required by github
