@@ -2,7 +2,7 @@
 
 ### Install
 ```
-$ cargo install --git https://github.com/storming0x/vvm-rs --locked vvm
+$ cargo install --git https://github.com/storming0x/vvm-rs --locked vvm-rs
 ```
 
 ### Install from source
