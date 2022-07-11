@@ -70,24 +70,6 @@ impl Installer {
 
         Ok(vyper_path)
     }
-
-    /// Extracts the vyper archive at the version specified destination and returns the path to the
-    /// installed vyper binary.
-    #[cfg(all(target_os = "windows", target_arch = "x86_64"))]
-    fn install_zip(&self) -> Result<PathBuf, VyperVmError> {
-        let version_path = version_path(self.version.to_string().as_str());
-        let vyper_path = version_path.join(&format!("vyper-{}", self.version));
-
-        // extract archive
-        let mut content = Cursor::new(&self.binbytes);
-        let mut archive = zip::ZipArchive::new(&mut content)?;
-        archive.extract(version_path.as_path())?;
-
-        // rename vyper binary
-        std::fs::rename(version_path.join("vyper.exe"), vyper_path.as_path())?;
-
-        Ok(vyper_path)
-    }
 }
 
 /// Derive path to a specific Vyper version's binary.
