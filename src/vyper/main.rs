@@ -7,7 +7,20 @@ fn main() -> anyhow::Result<()> {
     let mut version_path = vvm_lib::version_path(version.to_string().as_str());
     version_path.push(format!("vyper-{}", version.to_string().as_str()));
 
-    Command::new(version_path).args(args).spawn()?;
+    let child = Command::new(version_path)
+        .args(args)
+        .spawn()
+        .expect("Vyper wrapper: failed to execute vyper command");
+
+    let output = child
+        .wait_with_output()
+        .expect("Vyper wrapper: failed to wait for child output");
+
+    if output.status.success() {
+        println!("{}", std::str::from_utf8(&output.stdout).unwrap());
+    } else {
+        println!("{}", std::str::from_utf8(&output.stderr).unwrap());
+    }
 
     Ok(())
 }
