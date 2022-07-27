@@ -7,7 +7,7 @@ use std::collections::HashSet;
 mod print;
 
 #[derive(Debug, Parser)]
-#[clap(name = "vyper-vm", about = "Vyper version manager")]
+#[clap(name = "vvm", about = "Vyper Version Manager", version)]
 enum VyperVm {
     #[clap(about = "List all versions of Vyper")]
     List,
