@@ -175,7 +175,7 @@ fn add_gh_token(headers: &mut HeaderMap) {
     if let Ok(gh_token) = env::var("GITHUB_TOKEN") {
         let auth_string = format!("Basic {}", &gh_token);
         if let Ok(auth_header) = HeaderValue::from_str(auth_string.as_str()) {
-            println!("GITHUB_TOKEN found! using it to fetch releases");
+            // println!("GITHUB_TOKEN found! using it to fetch releases");
             headers.insert("Authorization", auth_header);
         }
     }

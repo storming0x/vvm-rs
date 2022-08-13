@@ -377,6 +377,7 @@ mod tests {
         assert!(install(rand_version).await.is_ok());
     }
 
+    #[ignore]
     #[tokio::test]
     async fn test_installed_versions() {
         let versions = all_releases(platform())
@@ -441,6 +442,7 @@ mod tests {
             .contains("0.3.3"));
     }
 
+    #[ignore]
     #[cfg(feature = "blocking")]
     #[test]
     fn can_install_parallel() {
