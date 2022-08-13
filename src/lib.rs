@@ -265,14 +265,14 @@ pub fn remove_version(version: &Version) -> Result<(), VyperVmError> {
     Ok(())
 }
 
-/// Setup SVM home directory.
+/// Setup VVM home directory.
 pub fn setup_home() -> Result<PathBuf, VyperVmError> {
-    // create ~/.svm
+    // create ~/.vvm
     let home_dir = VVM_HOME.to_path_buf();
     if !home_dir.as_path().exists() {
         fs::create_dir_all(home_dir.clone())?;
     }
-    // create ~/.svm/.global-version
+    // create ~/.vvm/.global-version
     let mut global_version = VVM_HOME.to_path_buf();
     global_version.push(".global-version");
     if !global_version.as_path().exists() {
