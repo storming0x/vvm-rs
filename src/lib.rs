@@ -388,7 +388,7 @@ mod tests {
         let rand_version = versions.choose(&mut rand::thread_rng()).unwrap();
         assert!(install(rand_version).await.is_ok());
         let installed_versions = installed_versions().unwrap_or_default();
-        assert!(&installed_versions.len() > &0);
+        assert!(installed_versions.len() > 0);
         assert!(&installed_versions.contains(rand_version));
     }
 

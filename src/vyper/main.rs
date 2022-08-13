@@ -19,7 +19,7 @@ async fn main() -> error::Result<()> {
     let mut cache = VyperFilesCache::get();
     let file_name = fs::canonicalize(&args[0]).map_err(|err| VyperError::io(err, &args[0]))?;
 
-    if args.len() == 1 && !args[0].starts_with("-") {
+    if args.len() == 1 && !args[0].starts_with('-') {
         // support cache only for single file inputs
         if let Some(entry) = cache.entry(file_name.clone()) {
             if !entry.is_dirty() {
@@ -49,9 +49,9 @@ async fn main() -> error::Result<()> {
     if output.status.success() {
         println!("{}", std::str::from_utf8(&output.stdout).unwrap());
         // cache house keeping
-        if args.len() == 1 && !args[0].starts_with("-") {
-            if let Some(bytecode) = get_bytecode(&output.stdout.clone()) {
-                if let Ok(_) = cache.add_entry(file_name, &bytecode) {
+        if args.len() == 1 && !args[0].starts_with('-') {
+            if let Some(bytecode) = get_bytecode(&output.stdout) {
+                if cache.add_entry(file_name, &bytecode).is_ok() {
                     let _ = cache.write(cache::get_cache_path());
                     // ignore errors
                     // TODO: add debug statements
@@ -66,9 +66,9 @@ async fn main() -> error::Result<()> {
 }
 
 fn get_bytecode(bytecode: &[u8]) -> Option<String> {
-    match std::str::from_utf8(&bytecode) {
-        Ok(b) if b.starts_with("0x") => return Some(b.to_string()),
-        Ok(_) => return None,
-        Err(_) => return None,
+    return match std::str::from_utf8(bytecode) {
+        Ok(b) if b.starts_with("0x") => Some(b.to_string()),
+        Ok(_) => None,
+        _ => None,
     };
 }
