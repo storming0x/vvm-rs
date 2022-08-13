@@ -4,6 +4,7 @@ mod error;
 use cache::VyperFilesCache;
 use std::{
     env, fs,
+    path::PathBuf,
     process::{Command, Stdio},
 };
 
@@ -17,11 +18,14 @@ async fn main() -> error::Result<()> {
     vvm_lib::setup_home()?;
 
     let mut cache = VyperFilesCache::get();
-    let file_name = fs::canonicalize(&args[0]).map_err(|err| VyperError::io(err, &args[0]))?;
+    let mut file_name: Option<PathBuf> = None;
 
     if args.len() == 1 && !args[0].starts_with('-') {
+        let file_name_canon =
+            fs::canonicalize(&args[0]).map_err(|err| VyperError::io(err, &args[0]))?;
+        file_name = Some(file_name_canon);
         // support cache only for single file inputs
-        if let Some(entry) = cache.entry(file_name.clone()) {
+        if let Some(entry) = cache.entry(file_name.clone().unwrap().clone()) {
             if !entry.is_dirty() {
                 // print out cached version
                 println!("{}", entry.deployed_bytecode);
@@ -49,9 +53,9 @@ async fn main() -> error::Result<()> {
     if output.status.success() {
         println!("{}", std::str::from_utf8(&output.stdout).unwrap());
         // cache house keeping
-        if args.len() == 1 && !args[0].starts_with('-') {
+        if args.len() == 1 && !args[0].starts_with('-') && file_name.is_some() {
             if let Some(bytecode) = get_bytecode(&output.stdout) {
-                if cache.add_entry(file_name, &bytecode).is_ok() {
+                if cache.add_entry(file_name.unwrap(), &bytecode).is_ok() {
                     let _ = cache.write(cache::get_cache_path());
                     // ignore errors
                     // TODO: add debug statements
