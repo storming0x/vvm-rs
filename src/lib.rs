@@ -453,6 +453,7 @@ mod tests {
         t.join().unwrap().unwrap();
     }
 
+    #[ignore]
     #[tokio::test(flavor = "multi_thread")]
     async fn can_install_parallel_async() {
         let version: Version = "0.3.3".parse().unwrap();
