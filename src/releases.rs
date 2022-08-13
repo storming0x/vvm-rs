@@ -7,6 +7,8 @@ use serde::{
 use std::collections::BTreeMap;
 use url::Url;
 
+use std::env;
+
 use crate::{error::VyperVmError, platform::Platform};
 
 const GITHUB_RELEASES: &str = "https://api.github.com/repos/vyperlang/vyper/releases?per_page=100";
@@ -156,6 +158,8 @@ async fn get_releases() -> Result<Vec<VyperReleases>, VyperVmError> {
     // add the user-agent header required by github
     headers.insert(USER_AGENT, HeaderValue::from_static("reqwest"));
 
+    add_gh_token(&mut headers);
+
     let vyper_releases = reqwest::Client::new()
         .get(GITHUB_RELEASES)
         .headers(headers)
@@ -167,11 +171,24 @@ async fn get_releases() -> Result<Vec<VyperReleases>, VyperVmError> {
     Ok(vyper_releases)
 }
 
+fn add_gh_token(headers: &mut HeaderMap) {
+    if let Ok(gh_token) = env::var("GITHUB_TOKEN") {
+        let auth_string = format!("Basic {}", &gh_token);
+        if let Ok(auth_header) = HeaderValue::from_str(auth_string.as_str()) {
+            // println!("GITHUB_TOKEN found! using it to fetch releases");
+            headers.insert("Authorization", auth_header);
+        }
+    }
+}
+
 #[allow(dead_code)]
 fn blocking_get_releases() -> Result<Vec<VyperReleases>, VyperVmError> {
     let mut headers = HeaderMap::new();
     // add the user-agent header required by github
     headers.insert(USER_AGENT, HeaderValue::from_static("reqwest"));
+
+    add_gh_token(&mut headers);
+
     let vyper_releases = reqwest::blocking::Client::new()
         .get(GITHUB_RELEASES)
         .headers(headers)

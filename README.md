@@ -5,7 +5,7 @@
 $ cargo install --git https://github.com/storming0x/vvm-rs --locked vvm-rs
 ```
 
-### Install from source
+### Install from source `vvm` and `vyper` (runner)
 ```
 $ git clone https://github.com/storming0x/vvm-rs 
 cd vvm-rs
@@ -33,6 +33,22 @@ $ vvm use <version>
 ```
 $ vvm remove <version>
 ```
+
+### Note and Issues
+VVM tries to use an environment variable called `GITHUB_TOKEN` to fetch and install vyper releases. In case its not found the installation may failed because of github rate limits
+
+### Vyper Runner Usage
+
+Vyper runner included in this repository proxies all commands to vyper compiler with an added layer of caching for all your vyper projects.
+
+```
+$ vyper <file-path-to-vyper-file>
+```
+
+Note: in case of issues with caching just delete the folder under `$HOME/.vvm/cache/`
+
+Caching only supports one file as input on commands.
+
 
 ### Credit and Acknowledgments
 

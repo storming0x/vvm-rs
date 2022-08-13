@@ -265,14 +265,14 @@ pub fn remove_version(version: &Version) -> Result<(), VyperVmError> {
     Ok(())
 }
 
-/// Setup SVM home directory.
+/// Setup VVM home directory.
 pub fn setup_home() -> Result<PathBuf, VyperVmError> {
-    // create ~/.svm
+    // create ~/.vvm
     let home_dir = VVM_HOME.to_path_buf();
     if !home_dir.as_path().exists() {
         fs::create_dir_all(home_dir.clone())?;
     }
-    // create ~/.svm/.global-version
+    // create ~/.vvm/.global-version
     let mut global_version = VVM_HOME.to_path_buf();
     global_version.push(".global-version");
     if !global_version.as_path().exists() {
@@ -377,6 +377,7 @@ mod tests {
         assert!(install(rand_version).await.is_ok());
     }
 
+    #[ignore]
     #[tokio::test]
     async fn test_installed_versions() {
         let versions = all_releases(platform())
@@ -388,7 +389,7 @@ mod tests {
         let rand_version = versions.choose(&mut rand::thread_rng()).unwrap();
         assert!(install(rand_version).await.is_ok());
         let installed_versions = installed_versions().unwrap_or_default();
-        assert!(&installed_versions.len() > &0);
+        assert!(installed_versions.len() > 0);
         assert!(&installed_versions.contains(rand_version));
     }
 
@@ -441,6 +442,7 @@ mod tests {
             .contains("0.3.3"));
     }
 
+    #[ignore]
     #[cfg(feature = "blocking")]
     #[test]
     fn can_install_parallel() {
@@ -451,6 +453,7 @@ mod tests {
         t.join().unwrap().unwrap();
     }
 
+    #[ignore]
     #[tokio::test(flavor = "multi_thread")]
     async fn can_install_parallel_async() {
         let version: Version = "0.3.3".parse().unwrap();
